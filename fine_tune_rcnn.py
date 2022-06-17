@@ -14,6 +14,7 @@ from sklearn.preprocessing import LabelBinarizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 from imutils import paths
+import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
@@ -62,7 +63,34 @@ aug = ImageDataGenerator(
     horizontal_flip=True,
     fill_mode="nearest")
 
-baseModel = MobileNetV2(weights="imagenet", include_top=False, input_tensor=Input(shape=(416,416,3)))
+#baseModel = MobileNetV2(weights="imagenet", include_top=False, input_tensor=Input(shape=(416,416,3)))
+
+baseModel = keras.Sequential([
+    keras.layers.Conv2D(filters=32, kernel_size=3,padding='same',
+    activation= 'relu', input_shape=(256,256,3)),
+    (keras.layers.MaxPooling2D(pool_size=(2,2))),
+    (tf.keras.layers.Dropout(0.3)),
+
+  (keras.layers.Conv2D(filters=64,kernel_size=(3,3),padding='same',
+    activation=tf.nn.relu)),
+    (keras.layers.MaxPooling2D(pool_size = (2,2))),
+    (keras.layers.Dropout(0.5)),
+
+  (keras.layers.Conv2D(filters=64,kernel_size=(3,3),padding='same',
+    activation=tf.nn.relu)),
+    (keras.layers.MaxPooling2D(pool_size = (2,2))),
+    (keras.layers.Dropout(0.5)),
+
+  (keras.layers.Conv2D(filters=128,kernel_size=(3,3),padding='same',
+    activation=tf.nn.relu)),
+    (keras.layers.MaxPooling2D(pool_size = (2,2))),
+    (keras.layers.Dropout(0.5)),
+
+  (keras.layers.Flatten()),
+    (keras.layers.Dense(128,activation=tf.nn.relu)),
+    (tf.keras.layers.Dropout(0.5)),
+    keras.layers.Dense(64,activation='relu'),
+    (tf.keras.layers.Dropout(0.25))])
 
 headModel = baseModel.output
 headModel = AveragePooling2D(pool_size=(7, 7))(headModel)
